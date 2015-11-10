@@ -12,6 +12,8 @@ import android.provider.ContactsContract;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
+import com.czt.mp3recorder.MP3Recorder;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
@@ -59,6 +61,7 @@ public class MyPhoneService extends Service {
 
     private final class PhoneListener extends PhoneStateListener{
         private MediaRecorder mediaRecorder;
+        private MP3Recorder mp3Recorder;
         private File file;
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
@@ -92,14 +95,24 @@ public class MyPhoneService extends Service {
                         if (!f1.exists()) {
                             f1.mkdirs();
                         }
-                        file = new File(path, Constant.fileName + ".3gp");
-                        MediaRecoder();
+                        file = new File(path, Constant.fileName + ".mp3");
+                        //MediaRecoder();
+                        mp3Recorder = new MP3Recorder(file);
+                        try{
+                            mp3Recorder.start();
+                        }catch(Exception e){
+                            e.printStackTrace();
+                        }
                         break;
                     case TelephonyManager.CALL_STATE_IDLE: // 挂断电话
-                        if (mediaRecorder != null) {
+                        /*if (mediaRecorder != null) {
                             mediaRecorder.stop();
                             mediaRecorder.release();
                             mediaRecorder = null;
+                        }*/
+                        if(mp3Recorder != null){
+                            mp3Recorder.stop();
+                            mp3Recorder = null;
                         }
                         break;
                 }
@@ -119,7 +132,7 @@ public class MyPhoneService extends Service {
             Constant.fileName =mYear + "年" + mMonth + "月" + mDay + "日" + mHour + "时" + mMinute + "分" + mSecond + "秒";
         }
 
-        private void MediaRecoder(){
+        /*private void MediaRecoder(){
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -135,7 +148,7 @@ public class MyPhoneService extends Service {
                 e.printStackTrace();
             }
             mediaRecorder.start();
-        }
+        }*/
 
     }
 }

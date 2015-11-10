@@ -52,7 +52,7 @@ public class SecondActivity extends Activity {
                         Uri uri = Uri.parse(path);
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         // intent.addCategory(Intent.CATEGORY_APP_MUSIC);
-                        intent.setDataAndType(uri, "video/3gpp");
+                        intent.setDataAndType(uri, "audio/mp3");
                         startActivity(intent);
                     }
                 }
