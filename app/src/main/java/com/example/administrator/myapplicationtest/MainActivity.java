@@ -1,5 +1,7 @@
 package com.example.administrator.myapplicationtest;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -54,10 +56,40 @@ public class MainActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
                 if(f.list()!=null){
                     Intent secondItent = new Intent();
+                    secondItent.putExtra("path",path);
                     secondItent.putExtra("name", fileList[arg2]);
                     secondItent.setClass(MainActivity.this, SecondActivity.class);
                     startActivity(secondItent);
                 }else{}
+            }
+        });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                if(f.list() != null){
+                    fileList = f.list();
+                    if(fileList.length != 0){
+                        AlertDialog bulider = new AlertDialog.Builder(MainActivity.this).setTitle("确认删除这个文件吗？").setMessage(fileList[position])
+                                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        File deleteFile = new File(path + "/" + fileList[position]);
+                                        deleteFile.delete();
+                                        list.remove(position);
+                                        listViewAdapter.notifyDataSetChanged();
+                                    }
+                                })
+                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                }).create();
+                        bulider.show();
+                    }
+                }
+                listViewAdapter.notifyDataSetChanged();
+                return false;
             }
         });
     }
@@ -121,5 +153,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        pathSelected = null;
+        list.clear();
+        super.onDestroy();
     }
 }

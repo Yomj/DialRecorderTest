@@ -1,6 +1,8 @@
 package com.example.administrator.myapplicationtest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,7 +27,7 @@ public class SecondActivity extends Activity {
     private ListViewAdapter adapter;
     private TextView titleView;
     private String name;
-    private String path;
+    private String path,pathSelected;
     private String filelist[];
     File file;
     @Override
@@ -35,6 +37,7 @@ public class SecondActivity extends Activity {
         setContentView(R.layout.second_activity);
         titleView = (TextView) findViewById(R.id.title_text_view2);
         Intent secondIntent = getIntent();
+        pathSelected = secondIntent.getStringExtra("path");
         name = secondIntent.getStringExtra("name");
         titleView.setText(name);
         listview = (ListView) findViewById(R.id.list_view2);
@@ -45,26 +48,55 @@ public class SecondActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                if(file.list() != null){
+                if (file.list() != null) {
                     filelist = file.list();
-                    if(filelist.length != 0){
-                        //File audioFile =  new File(path,filelist[position]);
-                        Uri uri = Uri.parse(path);
+                    if (filelist.length != 0) {
+                        File audioFile = new File(path, filelist[position]);
+                        Uri uri = Uri.parse(audioFile.getAbsolutePath());
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        // intent.addCategory(Intent.CATEGORY_APP_MUSIC);
-                        intent.setDataAndType(uri, "audio/mp3");
+                        //intent.addCategory(Intent.CATEGORY_APP_MUSIC);
+                        intent.setDataAndType(uri, "audio/*");
                         startActivity(intent);
                     }
                 }
-
             }
 
+        });
+        listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                if(file.list() != null){
+                    filelist = file.list();
+                    if(filelist.length != 0){
+                        AlertDialog bulider = new AlertDialog.Builder(SecondActivity.this).setTitle("确认删除这个文件吗？").setMessage(filelist[position])
+                                .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        File deleteFile = new File(path + "/" + filelist[position]);
+                                        deleteFile.delete();
+                                        list.remove(position);
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                })
+                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                })
+                                .create();
+                        bulider.show();
+                    }
+                }
+                adapter.notifyDataSetChanged();
+                return false;
+            }
         });
     }
 
     private List<Map<String, Object>> getData(){
         list = new ArrayList<Map<String, Object>>();
-        path = Environment.getExternalStorageDirectory() + "/recoding/" + name;
+        path = pathSelected + "/" + name;
         file = new File(path);
         if(file.list() == null){
             titleView.setText(name + "目前没有录音记录");
